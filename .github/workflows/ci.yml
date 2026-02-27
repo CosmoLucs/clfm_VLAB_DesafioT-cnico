@@ -1,0 +1,54 @@
+name: Fullstack CI (Linting)
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  # 1. LINT DO BACKEND (Obrigatório pelo desafio)
+  lint-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar o Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Instalar dependências do Python
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 black
+          if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi
+
+      - name: Formatação com Black (Backend)
+        run: black backend/ --check
+
+      - name: Analisar código com Flake8 (Backend)
+        run: flake8 backend/ --count --select=E9,F63,F7,F82 --show-source --statistics
+
+  # 2. LINT DO FRONTEND
+  lint-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar o Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22' # A versão que está a utilizar
+
+      - name: Instalar dependências do Frontend
+        run: |
+          cd frontend
+          npm install
+
+      - name: Analisar código com ESLint e TypeScript (Frontend)
+        run: |
+          cd frontend
+          npm run lint
